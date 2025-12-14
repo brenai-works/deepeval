@@ -17,7 +17,6 @@ from deepeval.models.utils import (
 from deepeval.models import DeepEvalBaseLLM
 from deepeval.models.llms.utils import trim_and_load_json
 
-
 def log_retry_error(retry_state: RetryCallState):
     exception = retry_state.outcome.exception()
     logging.error(
@@ -41,6 +40,9 @@ class LiteLLMModel(DeepEvalBaseLLM):
     JITTER: int = 2
     MAX_RETRIES: int = 6
     MAX_WAIT: int = 10
+
+    # Temporary workaround. 
+    LLM_MODEL: str = "mistral/mistral-small-latest"
 
     def __init__(
         self,
@@ -137,6 +139,8 @@ class LiteLLMModel(DeepEvalBaseLLM):
             completion_params["api_key"] = api_key
         if self.base_url:
             completion_params["api_base"] = self.base_url
+            if self.model == self.LLM_MODEL: # Temporary workaround.
+                del completion_params["api_base"]
 
         # Add schema if provided
         if schema:
@@ -193,6 +197,8 @@ class LiteLLMModel(DeepEvalBaseLLM):
             completion_params["api_key"] = api_key
         if self.base_url:
             completion_params["api_base"] = self.base_url
+            if self.name == self.LLM_MODEL: # Temporary workaround.
+                del completion_params["api_base"] 
 
         # Add schema if provided
         if schema:
@@ -250,6 +256,10 @@ class LiteLLMModel(DeepEvalBaseLLM):
                 "logprobs": True,
                 "top_logprobs": top_logprobs,
             }
+
+            if self.name == self.LLM_MODEL: # Temporary workaround.
+                del completion_params["api_base"] 
+
             completion_params.update(self.kwargs)
 
             response = completion(**completion_params)
@@ -291,6 +301,10 @@ class LiteLLMModel(DeepEvalBaseLLM):
                 "logprobs": True,
                 "top_logprobs": top_logprobs,
             }
+
+            if self.name == self.LLM_MODEL: # Temporary workaround.
+                del completion_params["api_base"] 
+
             completion_params.update(self.kwargs)
 
             response = await acompletion(**completion_params)
@@ -329,6 +343,10 @@ class LiteLLMModel(DeepEvalBaseLLM):
                 "api_key": api_key,
                 "api_base": self.base_url,
             }
+
+            if self.name == self.LLM_MODEL: # Temporary workaround.
+                del completion_params["api_base"] 
+
             completion_params.update(self.kwargs)
 
             response = completion(**completion_params)
